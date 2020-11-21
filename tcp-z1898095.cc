@@ -180,6 +180,8 @@ int main(int argc, char* argv[]) {
             // remove trailing whitespace
             return_message[strlen(return_message) - 1] = '\0';
 
+            printf("MESSAGE TO SEND TO CLIENT: %s\n", return_message);
+
             // write the message back to client
             if (write(newSock, return_message, sizeof(return_message)) != sizeof(return_message))
             {
