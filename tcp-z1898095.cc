@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     // Attemp to open root dir
     printf("Attempting to open server root directory: %s\n", root_directory);
     DIR* p_rdir;
-    p_rdir = opendir(directory);
+    p_rdir = opendir(root_directory);
     if (p_rdir == NULL)
     {
         perror("Server root directory does not exist\n");
@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
             // if last character isn't '/', add it
             if (directory[strlen(directory) - 1] != '/')
             {
-                strcat(directory, '/');
-            }s
+                strcat(directory, "/");
+            }
 
             // try to open directory
             printf("Attempting to open directory: %s\n", directory);
