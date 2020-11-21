@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
             if (strlen(message) < 5)
             {
                 // message is less than 5 bytes, no way it is ever valid
-                fprint("Request too short\n");
+                printf("Request too short\n");
                 shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
@@ -189,7 +189,6 @@ int main(int argc, char* argv[]) {
                     if (ferror(fp))
                     {
                         perror("Failed to send index.html");
-                        closedir(p_dir);
                         fclose(fp);
                         shutdown(client_sock, SHUT_RD);
                         exit(EXIT_FAILURE);
