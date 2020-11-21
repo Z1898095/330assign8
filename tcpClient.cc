@@ -48,11 +48,7 @@ int main(int argc, char* argv[]) {
     // Receive the message back from the server
     char buffer[256];
     size_t received;
-    if ((received = read(sock, buffer, 256)) != sizeof(message))
-    {
-        perror("Mismatch in number of received bytes");
-        exit(EXIT_FAILURE);
-    }
+    received = read(sock, buffer, 256);
 
     // Assure null-terminated string
     buffer[received] = '\0';
