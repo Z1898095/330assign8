@@ -21,7 +21,8 @@ int port;
 char* root_directory;
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
+    if (argc != 3)
+    {
         perror("Requires two computer arguments");
         exit(EXIT_FAILURE);
     }
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]) {
             if (strlen(message) < 5)
             {
                 // message is less than 5 bytes, no way it is ever valid
-                perror("Request too short");
+                fprint("Request too short\n");
                 shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
@@ -155,12 +156,54 @@ int main(int argc, char* argv[]) {
             // directory -> "serverfiles/dog"
             char* directory = strdup(root_directory);
             strcat(directory, message + 4);
+            
             // if last character isn't '/', add it
             if (directory[strlen(directory) - 1] != '/')
             {
                 strcat(directory, "/");
             }
 
+            // If we can open "index.html" or the directory itself (meaning it's a file), send it to client.
+            char* index_dir = strdup(directory);
+            strcat(index_dir, "index.html");
+            printf("Attemping to open index.html file at %s\n", index_dir);
+            FILE* fp = fopen(index_dir, "r");
+
+            if (fp == NULL)
+            {
+                printf("Attemping to open file at %s\n", index_dir);
+                fp = fopen(directory, "f");
+            }
+
+            if (fp != NULL)
+            {
+                perror("index.html or given file found\n");
+                
+                // send index.html to the client
+                // read 1024 bytes at a time
+                char buf[1024];
+                size_t nread;
+
+                while ((nread = fread(buf, 1, sizeof(buf), fp)) > 0)
+                {
+                    if (ferror(fp))
+                    {
+                        perror("Failed to send index.html");
+                        closedir(p_dir);
+                        fclose(fp);
+                        shutdown(client_sock, SHUT_RD);
+                        exit(EXIT_FAILURE);
+                    }
+
+                    write(client_sock, buf, nread);
+                }
+
+                fclose(fp);
+                shutdown(client_sock, SHUT_RD);
+                exit(1);
+            }
+            printf("index.html or file not found\n");
+            
             // try to open directory
             printf("Attempting to open directory: %s\n", directory);
             DIR* p_dir;
@@ -173,43 +216,12 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
 
-            // If we can open "index.html" or the directory itself (meaning it's a file), send it to client.
-            char* index_dir = strdup(directory);
-            strcat(index_dir, "index.html");
-            printf("Searching for index.html file at %s\n", index_dir);
-            FILE* fp = fopen(index_dir, "r");
-            if (fp == NULL) {
-                fp = fopen(directory, "f");
-            }
-            if (fp != NULL) {
-                perror("index.html or given file found\n");
-                // send index.html to the client
-                // read 1024 bytes at a time
-                char buf[1024];
-                size_t nread;
-                while ((nread = fread(buf, 1, sizeof(buf), fp)) > 0)
-                {
-                    if (ferror(fp))
-                    {
-                        perror("Failed to send index.html");
-                        closedir(p_dir);
-                        fclose(fp);
-                        shutdown(client_sock, SHUT_RD);
-                        exit(EXIT_FAILURE);
-                    }
-                    write(client_sock, buf, nread);
-                }
-                fclose(fp);
-                shutdown(client_sock, SHUT_RD);
-                exit(1);
-            }
-            perror("index.html not found\n");
-
-            // Otherwise, loop through files in the directory and add the name of each file to a message
+            // loop through files in the directory and add the name of each file to a message
             printf ("Looking through files in directory:\n");
             char* return_message = (char*) malloc(sizeof(char) * 1);
             return_message[0] = '\0';
             struct dirent* p_direntry;
+
             while ((p_direntry = readdir(p_dir)) != NULL)
             {
                 char* fname = p_direntry->d_name;
@@ -222,7 +234,9 @@ int main(int argc, char* argv[]) {
                 strcat(return_message, fname);
                 strcat(return_message, " ");
             }
+
             closedir(p_dir);
+            
             // remove trailing whitespace
             return_message[strlen(return_message) - 1] = '\0';
 
