@@ -13,10 +13,20 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "utils.h"
 
-int main(int argc, char* argvp[]) {
-    printf("hello!");
+int port;
+std::string root_directory;
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        perror("Requires two computer arguments");
+        exit(2);
+    }
+
+    port = argv[1];
+    root_directory = argv[2];
+    
+    printf("Port is: %d | Root dir is: %s\n", port, root_directory);
 }
 
 int asdf(int argc, char * argv[])
@@ -32,13 +42,11 @@ int asdf(int argc, char * argv[])
     }
 
     struct sockaddr_in echoserver; // structure for address of server
-
     // Construct the server sockaddr_in structure
     memset(&echoserver, 0, sizeof(echoserver)); /* Clear struct */
     echoserver.sin_family = AF_INET;            /* Internet/IP */
     echoserver.sin_addr.s_addr = INADDR_ANY;    /* Any IP address */
     echoserver.sin_port = htons(atoi(argv[1])); /* server port */
-
     // Bind the socket
     serverlen = sizeof(echoserver);
     if (bind(sock, (struct sockaddr *) &echoserver, serverlen) < 0)
