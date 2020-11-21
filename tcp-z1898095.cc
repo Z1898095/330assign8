@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
             // If we can open "index.html" or the directory itself (meaning it's a file), send it to client.
             char* index_dir = strdup(directory);
             strcat(index_dir, "index.html");
-            perror("Searching for index.html file at %s\n", index_dir);
+            printf("Searching for index.html file at %s\n", index_dir);
             FILE* fp = fopen(index_dir, "r");
             if (fp == NULL) {
                 fp = fopen(directory, "f");
