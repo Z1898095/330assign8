@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <iostream>
 
 using namespace std;
 
@@ -45,6 +46,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Receive the message back from the server
+    char buffer[256];
+    size_t received;
     if ((received = read(sock, buffer, 256)) != sizeof(message))
     {
         perror("Mismatch in number of received bytes");
@@ -53,5 +56,5 @@ int main(int argc, char* argv[]) {
 
     // Assure null-terminated string
     buffer[received] = '\0';
-    cout << "Server (" << inet_ntoa(echoserver.sin_addr) << ") echoed: " << buffer << endl;
+    std::cout << "Server (" << inet_ntoa(server_struct.sin_addr) << ") echoed: " << buffer << endl;
 }
