@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) {
             // message = "GET /dog"
             // directory -> "serverfiles/dog"
             char* directory = strdup(root_directory);
-            strcat(directory, message + 4);
+            strcat(directory, message + 3);
             
             // if last character is '/' remove it
             if (directory[strlen(directory) - 1] == '/')
