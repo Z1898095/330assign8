@@ -156,7 +156,8 @@ int main(int argc, char* argv[]) {
             // Otherwise, add the name of each file to a message
             printf ("Looking through files in directory:\n");
             
-            char* return_message = "";
+            char* return_message = malloc(sizeof(char) * 1);
+            return_message[0] = '\0';
             struct dirent* p_direntry;
             while ((p_direntry = readdir(p_dir)) != NULL) {
                 printf ("[%s]\n", p_direntry->d_name);
