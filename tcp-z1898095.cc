@@ -164,12 +164,21 @@ int main(int argc, char* argv[]) {
             struct dirent* p_direntry;
             while ((p_direntry = readdir(p_dir)) != NULL) {
                 printf ("[%s]\n", p_direntry->d_name);
-                if (strcmp(p_direntry->d_name, "index.html") == 0) {
+                char* name = p_direntry->d_name;
+
+                if (strcmp(name, "index.html") == 0) {
                     printf ("index.html found\n");
                 }
-                strcat(return_message, " ");
+                if (strcmp(".", name) == 0 || strcmp("..", name) == 0) {
+                    // skip
+                    continue;
+                }
+
                 strcat(return_message, p_direntry->d_name);
+                strcat(return_message, " ");
             }
+            // remove trailing whitespace
+            return_message[strlen(return_message) - 1] = '\0';
 
             // write the message back to client
             if (write(newSock, return_message, sizeof(return_message)) != sizeof(return_message))

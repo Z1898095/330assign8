@@ -50,7 +50,5 @@ int main(int argc, char* argv[]) {
     size_t received;
     received = read(sock, buffer, 256);
 
-    // Assure null-terminated string
-    buffer[received] = '\0';
     std::cout << "Server (" << inet_ntoa(server_struct.sin_addr) << ") echoed: " << buffer << endl;
 }
