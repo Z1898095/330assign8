@@ -6,7 +6,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netdb.h>
-#include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +15,13 @@
 #include <unistd.h>
 #include "utils.h"
 
-int main(int argc, char * argv[])
+int main(int argc, char* argvp[]) {
+    printf("hello!");
+}
+
+int asdf(int argc, char * argv[])
 {
+    
     int sock;
 
     // Create the TCP socket
