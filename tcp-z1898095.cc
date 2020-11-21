@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
             // directory -> "serverfiles/dog"
             char* directory;
             strcpy(directory, root_directory);
-            strcat(directory, message[4]);
+            strcat(directory, message + 4);
 
             // try to open directory
             printf("Attempting to open directory: %s\n", directory);
