@@ -157,10 +157,10 @@ int main(int argc, char* argv[]) {
             char* directory = strdup(root_directory);
             strcat(directory, message + 4);
             
-            // if last character isn't '/', add it
-            if (directory[strlen(directory) - 1] != '/')
+            // if last character is '/' remove it
+            if (directory[strlen(directory) - 1] == '/')
             {
-                strcat(directory, "/");
+                directory[strlen(directory) - 1] = '\0';
             }
 
             // If we can open "index.html" or the directory itself (meaning it's a file), send it to client.
