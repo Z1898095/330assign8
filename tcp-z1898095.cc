@@ -62,8 +62,7 @@ int main(int argc, char* argv[]) {
     /* int bind(int sockfd, const struct sockaddr *addr, 
                           socklen_t addrlen);
     */
-    serverlen = sizeof(server_struct);
-    if (bind(sock, (struct sockaddr *) &server_struct, serverlen) < 0)
+    if (bind(sock, (struct sockaddr *) &server_struct, sizeof(server_struct)) < 0)
     {
         perror("Failed to bind server socket");
         exit(EXIT_FAILURE);
@@ -79,7 +78,7 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    print("Waiting for client connections.\n");
+    printf("Waiting for client connections.\n");
     // Accept client connections forever
     while (int newSock = accept(sock, (struct sockaddr *) &server_struct, sizeof(server_struct)))
     {
@@ -91,6 +90,7 @@ int main(int argc, char* argv[]) {
 
             // read a message from the client
             char message_buffer[256];
+            ssize_t received_len;
             if ((received_len = read(newSock, message_buffer, 256)) < 0)
             {
                 perror("Failed to receive message");
