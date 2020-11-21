@@ -89,7 +89,8 @@ int main(int argc, char* argv[]) {
         int newSock = accept(sock, (struct sockaddr *) &server_struct, &server_struct_len);
         // fork on new client connection
         int pid = fork(); // pid == 0 for child, child pid for parent
-        if (pid == 0) {
+        if (pid == 0)
+        {
             printf("Client connection created. socket = %d, pid = %d\n", newSock, getpid());
             printf("Waiting for client message:\n");
 
@@ -116,7 +117,8 @@ int main(int argc, char* argv[]) {
              * 
              */
 
-            if (strlen(message) < 5) {
+            if (strlen(message) < 5)
+            {
                 // message is less than 5 bytes, no way it is ever valid
                 perror("Request too short");
                 shutdown(newSock, SHUT_RD);
@@ -126,7 +128,8 @@ int main(int argc, char* argv[]) {
             // check that prefix is equal to "GET /"
             char* msg_prefix = (char*) malloc(strlen(message));
             strncpy(msg_prefix, message, 5);
-            if (strcmp("GET /", msg_prefix) != 0) {
+            if (strcmp("GET /", msg_prefix) != 0)
+            {
                 // message doesn't start with "GET /" so it is malformed
                 perror("Request is malformed.");
                 shutdown(newSock, SHUT_RD);
@@ -138,43 +141,61 @@ int main(int argc, char* argv[]) {
             // root_directory = "serverfiles"
             // message = "GET /dog"
             // directory -> "serverfiles/dog"
-            printf("1\n");
             char* directory = strdup(root_directory);
-            printf("2\n");
             strcat(directory, message + 4);
-            printf("3\n");
 
             // try to open directory
             printf("Attempting to open directory: %s\n", directory);
             DIR* p_dir;
             p_dir = opendir(directory);
-            if (p_dir == NULL) {
+            if (p_dir == NULL)
+            {
                 perror("Directory does not exist\n");
                 shutdown(newSock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
-            // Loop through files in the directory. If we find one called "index.html", open it and send to client.
+            // Loop through files in the directory. If we can open one called "index.html", send it to client.
             // Otherwise, add the name of each file to a message
+            char* index_dir = strdup(directory);
+            strcat(index_dir, "index.html");
+            FILE* fp = fopen(index_dir, "r");
+            if (fp != NULL) {
+                // send index.html to the client
+                // read 1024 bytes at a time
+                char buf[1024];
+                FILE *file;
+                size_t nread;
+                while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
+                {
+                    fwrite(buf, 1, nread, newSock);
+                }
+                if (ferror(fp))
+                {
+                    perror("Failed to send index.html");
+                    fclose(file);
+                    shutdown(newSock, SHUT_RD);
+                    exit(EXIT_FAILURE);
+                }
+                fclose(file);
+                shutdown(newSock, SHUT_RD);
+            }
+
             printf ("Looking through files in directory:\n");
-            fflush(stdout);
-            
             char* return_message = (char*) malloc(sizeof(char) * 1);
             return_message[0] = '\0';
             struct dirent* p_direntry;
-            while ((p_direntry = readdir(p_dir)) != NULL) {
-                printf ("[%s]\n", p_direntry->d_name);
-                char* name = p_direntry->d_name;
+            while ((p_direntry = readdir(p_dir)) != NULL)
+            {
+                char* fname = p_direntry->d_name;
+                printf ("[%s]\n", fname);
 
-                if (strcmp(name, "index.html") == 0) {
-                    printf ("index.html found\n");
-                }
-                if (strcmp(".", name) == 0 || strcmp("..", name) == 0) {
-                    // skip
+                if (strcmp(".", fname) == 0 || strcmp("..", fname) == 0)
+                {
                     continue;
                 }
 
-                strcat(return_message, p_direntry->d_name);
+                strcat(return_message, fname);
                 strcat(return_message, " ");
             }
             // remove trailing whitespace
@@ -191,11 +212,12 @@ int main(int argc, char* argv[]) {
             }
 
             shutdown(newSock, SHUT_RD);
-        } else if (pid == -1) {
+        }
+        else if (pid == -1)
+        {
             perror("fork failed");
             shutdown(newSock, SHUT_RD);
             exit(EXIT_FAILURE);
         }
-
     }
 }
