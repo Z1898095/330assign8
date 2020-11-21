@@ -28,6 +28,18 @@ int main(int argc, char* argv[]) {
 
     port = atoi(argv[1]);
     root_directory = argv[2];
+
+    // Attemp to open root dir
+    printf("Attempting to open server root directory: %s\n", root_directory);
+    DIR* p_rdir;
+    p_rdir = opendir(directory);
+    if (p_rdir == NULL)
+    {
+        perror("Server root directory does not exist\n");
+        closedir(p_rdir);
+        exit(EXIT_FAILURE);
+    }
+    closedir(p_rdir);
     
     printf("Port is: %d | Root dir is: %s\n", port, root_directory);
 
@@ -143,6 +155,11 @@ int main(int argc, char* argv[]) {
             // directory -> "serverfiles/dog"
             char* directory = strdup(root_directory);
             strcat(directory, message + 4);
+            // if last character isn't '/', add it
+            if (directory[strlen(directory) - 1] != '/')
+            {
+                strcat(directory, '/');
+            }s
 
             // try to open directory
             printf("Attempting to open directory: %s\n", directory);
@@ -151,6 +168,7 @@ int main(int argc, char* argv[]) {
             if (p_dir == NULL)
             {
                 perror("Directory does not exist\n");
+                closedir(p_dir);
                 shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
@@ -171,6 +189,7 @@ int main(int argc, char* argv[]) {
                     if (ferror(fp))
                     {
                         perror("Failed to send index.html");
+                        closedir(p_dir);
                         fclose(fp);
                         shutdown(client_sock, SHUT_RD);
                         exit(EXIT_FAILURE);
@@ -198,6 +217,7 @@ int main(int argc, char* argv[]) {
                 strcat(return_message, fname);
                 strcat(return_message, " ");
             }
+            closedir(p_dir);
             // remove trailing whitespace
             return_message[strlen(return_message) - 1] = '\0';
 
