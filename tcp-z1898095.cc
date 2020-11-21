@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
             }
 
             // check that prefix is equal to "GET /"
-            char* msg_prefix;
+            char* msg_prefix = (char*) malloc(strlen(message));
             strncpy(msg_prefix, message, 5);
             if (strcmp("GET /", msg_prefix) != 0) {
                 // message doesn't start with "GET /" so it is malformed
