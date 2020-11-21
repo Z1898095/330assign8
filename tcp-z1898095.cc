@@ -80,8 +80,10 @@ int main(int argc, char* argv[]) {
 
     printf("Waiting for client connections.\n");
     // Accept client connections forever
-    while (int newSock = accept(sock, (struct sockaddr *) &server_struct, sizeof(server_struct)))
+    while (true)
     {
+        socklen_t server_struct_len = sizeof(server_struct);
+        int newSock = accept(sock, (struct sockaddr *) &server_struct, &server_struct_len);
         // fork on new client connection
         int pid = fork(); // pid == 0 for child, child pid for parent
         if (pid == 0) {
