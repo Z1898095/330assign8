@@ -173,16 +173,19 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
 
-            // Loop through files in the directory. If we can open one called "index.html", send it to client.
-            // Otherwise, add the name of each file to a message
+            // If we can open "index.html" or the directory itself (meaning it's a file), send it to client.
             char* index_dir = strdup(directory);
             strcat(index_dir, "index.html");
+            perror("Searching for index.html file at %s\n", index_dir);
             FILE* fp = fopen(index_dir, "r");
+            if (fp == NULL) {
+                fp = fopen(directory, "f");
+            }
             if (fp != NULL) {
+                perror("index.html or given file found\n");
                 // send index.html to the client
                 // read 1024 bytes at a time
                 char buf[1024];
-                FILE *file;
                 size_t nread;
                 while ((nread = fread(buf, 1, sizeof(buf), fp)) > 0)
                 {
@@ -198,8 +201,11 @@ int main(int argc, char* argv[]) {
                 }
                 fclose(fp);
                 shutdown(client_sock, SHUT_RD);
+                exit(1);
             }
+            perror("index.html not found\n");
 
+            // Otherwise, loop through files in the directory and add the name of each file to a message
             printf ("Looking through files in directory:\n");
             char* return_message = (char*) malloc(sizeof(char) * 1);
             return_message[0] = '\0';
@@ -207,13 +213,12 @@ int main(int argc, char* argv[]) {
             while ((p_direntry = readdir(p_dir)) != NULL)
             {
                 char* fname = p_direntry->d_name;
-                printf ("[%s]\n", fname);
-
-                if (strcmp(".", fname) == 0 || strcmp("..", fname) == 0)
+                if (fname[0] == '.')
                 {
                     continue;
                 }
 
+                printf ("[%s]\n", fname);
                 strcat(return_message, fname);
                 strcat(return_message, " ");
             }
@@ -221,7 +226,7 @@ int main(int argc, char* argv[]) {
             // remove trailing whitespace
             return_message[strlen(return_message) - 1] = '\0';
 
-            printf("MESSAGE TO SEND TO CLIENT: %s\n", return_message);
+            //printf("MESSAGE TO SEND TO CLIENT: %s\n", return_message);
 
             // write the message back to client
             if (write(client_sock, return_message, sizeof(return_message)) != sizeof(return_message))
