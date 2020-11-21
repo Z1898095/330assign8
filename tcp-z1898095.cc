@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
             }
 
-            printf("Client message received:\n %s\n", message);
+            printf("Client message received:\n%s\n", message);
 
             // PARSE MESSAGE
             /**
@@ -154,6 +154,7 @@ int main(int argc, char* argv[]) {
             // Loop through files in the directory. If we find one called "index.html", open it and send to client.
             // Otherwise, add the name of each file to a message
             printf ("Looking through files in directory:\n");
+            fflush(std::stdout);
             
             char* return_message = (char*) malloc(sizeof(char) * 1);
             return_message[0] = '\0';
