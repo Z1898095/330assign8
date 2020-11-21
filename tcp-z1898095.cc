@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
             struct dirent* p_direntry;
             while ((p_direntry = readdir(p_dir)) != NULL) {
                 printf ("[%s]\n", p_direntry->d_name);
-                if (strcmp(p_direntry->d_name, "index.html") ==) {
+                if (strcmp(p_direntry->d_name, "index.html") == 0) {
                     printf ("index.html found\n");
                 }
                 strcat(return_message, " ");
