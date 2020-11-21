@@ -86,21 +86,21 @@ int main(int argc, char* argv[]) {
     while (true)
     {
         socklen_t server_struct_len = sizeof(server_struct);
-        int newSock = accept(sock, (struct sockaddr *) &server_struct, &server_struct_len);
+        int client_sock = accept(sock, (struct sockaddr *) &server_struct, &server_struct_len);
         // fork on new client connection
         int pid = fork(); // pid == 0 for child, child pid for parent
         if (pid == 0)
         {
-            printf("Client connection created. socket = %d, pid = %d\n", newSock, getpid());
+            printf("Client connection created. socket = %d, pid = %d\n", client_sock, getpid());
             printf("Waiting for client message:\n");
 
             // read a message from the client
             char message[256];
             ssize_t received_len;
-            if ((received_len = read(newSock, message, 256)) < 0)
+            if ((received_len = read(client_sock, message, 256)) < 0)
             {
                 perror("Failed to receive message");
-                shutdown(newSock, SHUT_RD);
+                shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
             {
                 // message is less than 5 bytes, no way it is ever valid
                 perror("Request too short");
-                shutdown(newSock, SHUT_RD);
+                shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
             {
                 // message doesn't start with "GET /" so it is malformed
                 perror("Request is malformed.");
-                shutdown(newSock, SHUT_RD);
+                shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
             if (p_dir == NULL)
             {
                 perror("Directory does not exist\n");
-                shutdown(newSock, SHUT_RD);
+                shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
@@ -166,19 +166,19 @@ int main(int argc, char* argv[]) {
                 char buf[1024];
                 FILE *file;
                 size_t nread;
-                while ((nread = fread(buf, 1, sizeof buf, file)) > 0)
+                while ((nread = fread(buf, 1, sizeof(buf), fp)) > 0)
                 {
-                    fwrite(buf, 1, nread, newSock);
+                    if (ferror(fp))
+                    {
+                        perror("Failed to send index.html");
+                        fclose(fp);
+                        shutdown(client_sock, SHUT_RD);
+                        exit(EXIT_FAILURE);
+                    }
+                    write(client_sock, buf, nread);
                 }
-                if (ferror(fp))
-                {
-                    perror("Failed to send index.html");
-                    fclose(file);
-                    shutdown(newSock, SHUT_RD);
-                    exit(EXIT_FAILURE);
-                }
-                fclose(file);
-                shutdown(newSock, SHUT_RD);
+                fclose(fp);
+                shutdown(client_sock, SHUT_RD);
             }
 
             printf ("Looking through files in directory:\n");
@@ -204,19 +204,19 @@ int main(int argc, char* argv[]) {
             printf("MESSAGE TO SEND TO CLIENT: %s\n", return_message);
 
             // write the message back to client
-            if (write(newSock, return_message, sizeof(return_message)) != sizeof(return_message))
+            if (write(client_sock, return_message, sizeof(return_message)) != sizeof(return_message))
             {
                 perror("Bytes lost when sending message");
-                shutdown(newSock, SHUT_RD);
+                shutdown(client_sock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
-            shutdown(newSock, SHUT_RD);
+            shutdown(client_sock, SHUT_RD);
         }
         else if (pid == -1)
         {
             perror("fork failed");
-            shutdown(newSock, SHUT_RD);
+            shutdown(client_sock, SHUT_RD);
             exit(EXIT_FAILURE);
         }
     }
