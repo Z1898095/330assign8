@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+using namespace std;
+
 int main(int argc, char* argv[]) {
     int sock;
 
@@ -19,30 +21,31 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    struct sockaddr_in server_struct;                // structure for address of server
     // Construct the server sockaddr_in structure
-    memset(&echoserver, 0, sizeof(echoserver));      /* Clear struct */
-    echoserver.sin_family = AF_INET;                 /* Internet/IP */
-    echoserver.sin_addr.s_addr = inet_addr(argv[1]); /* IP address */
-    echoserver.sin_port = htons(atoi(argv[2]));      /* server port */
+    memset(&server_struct, 0, sizeof(server_struct));      /* Clear struct */
+    server_struct.sin_family = AF_INET;                 /* Internet/IP */
+    server_struct.sin_addr.s_addr = inet_addr(argv[1]); /* IP address */
+    server_struct.sin_port = htons(atoi(argv[2]));      /* server port */
 
 
     // connect to server
-    if (connect(sock, (struct sockaddr *) &echoserver, sizeof(echoserver)) < 0)
+    if (connect(sock, (struct sockaddr *) &server_struct, sizeof(server_struct)) < 0)
     {
         perror("cannot connect");
         exit(EXIT_FAILURE);
     }
 
     // Send the message to the server
-    echolen = strlen(argv[3]);
-    if (write(sock, argv[3], echolen) != echolen)
+    char* message = argv[3];
+    if (write(sock, message, sizeof(message)) != sizeof(message))
     {
         perror("Mismatch in number of sent bytes");
         exit(EXIT_FAILURE);
     }
 
     // Receive the message back from the server
-    if ((received = read(sock, buffer, 256)) != echolen)
+    if ((received = read(sock, buffer, 256)) != sizeof(message))
     {
         perror("Mismatch in number of received bytes");
         exit(EXIT_FAILURE);

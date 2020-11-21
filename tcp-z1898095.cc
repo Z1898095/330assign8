@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
             if ((received_len = read(newSock, message_buffer, 256)) < 0)
             {
                 perror("Failed to receive message");
-                shutdown(newSock, SHUT_WR);
+                shutdown(newSock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
@@ -106,11 +106,11 @@ int main(int argc, char* argv[]) {
             if (write(newSock, message_buffer, received_len) != received_len)
             {
                 perror("Mismatch in number of bytes");
-                shutdown(newSock, SHUT_WR);
+                shutdown(newSock, SHUT_RD);
                 exit(EXIT_FAILURE);
             }
 
-            shutdown(newSock, SHUT_WR);
+            shutdown(newSock, SHUT_RD);
         }
     }
 }
