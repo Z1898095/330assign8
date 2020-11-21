@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 int port;
-std::string root_directory;
+char* root_directory;
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
         exit(2);
     }
 
-    port = argv[1];
+    port = atoi(argv[1]);
     root_directory = argv[2];
     
     printf("Port is: %d | Root dir is: %s\n", port, root_directory);
