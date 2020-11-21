@@ -138,8 +138,11 @@ int main(int argc, char* argv[]) {
             // root_directory = "serverfiles"
             // message = "GET /dog"
             // directory -> "serverfiles/dog"
+            printf("1\n");
             char* directory = strdup(root_directory);
+            printf("2\n");
             strcat(directory, message + 4);
+            printf("3\n");
 
             // try to open directory
             printf("Attempting to open directory: %s\n", directory);
